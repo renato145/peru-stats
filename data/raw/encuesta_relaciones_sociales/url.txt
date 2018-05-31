@@ -1,0 +1,1 @@
+http://iinei.inei.gob.pe/microdatos/consulta.asp?cmbencuesta=Encuesta+Nacional+Sobre+Relaciones+Sociales+-+ENARES&cmbanno=2015&cmbTrimestre=48
