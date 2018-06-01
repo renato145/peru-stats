@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .vega-actions a {
+        margin-right: 12px;
+        color: #757575;
+        font-weight: normal;
+        font-size: 13px;
+    }
+    .error {
+        color: red;
+    }
+  </style>
+
+<script src="https://cdn.jsdelivr.net/npm//vega@3.2"></script>
+<script src="https://cdn.jsdelivr.net/npm//vega-lite@2.4.1"></script>
+<script src="https://cdn.jsdelivr.net/npm//vega-embed@3.0"></script>
+
+</head>
+<body>
+  <div id="vis"></div>
+  <script type="text/javascript">
+    var spec = {"config": {"view": {"width": 400, "height": 300}}, "layer": [{"data": {"values": [{"c1": -0.0006391571350059887, "c2": -0.0005466653213788196, "region": "Amazonas", "poblacion": 422629.0}, {"c1": -0.00032136447612817615, "c2": 0.0002879914137148724, "region": "Ancash", "poblacion": 1148634.0}, {"c1": -0.0032590358975942034, "c2": -0.00024605274169488603, "region": "Apurimac", "poblacion": 458830.0}, {"c1": 0.004467391148778416, "c2": -0.00018717926307334858, "region": "Arequipa", "poblacion": 1287205.0}, {"c1": -0.0036475042294933082, "c2": 5.774647870997973e-05, "region": "Ayacucho", "poblacion": 688657.0}, {"c1": -0.003485699900964016, "c2": -0.00016022366868761022, "region": "Cajamarca", "poblacion": 1529755.0}, {"c1": 0.005063433555355423, "c2": -9.258343770139541e-05, "region": "Callao", "poblacion": 1010315.0}, {"c1": -0.0010875540295277625, "c2": 0.0009519143767577344, "region": "Cusco", "poblacion": 1316729.0}, {"c1": -0.004286559720646637, "c2": -0.0005938027412891871, "region": "Huancavelica", "poblacion": 494963.0}, {"c1": -0.0040543961614584794, "c2": -0.0001519644147465069, "region": "Huanuco", "poblacion": 860537.0}, {"c1": 0.00639365848450756, "c2": -0.0003711664269095252, "region": "Ica", "poblacion": 787170.0}, {"c1": -0.0022135738286225798, "c2": 0.00047460237757162167, "region": "Junin", "poblacion": 1350783.0}, {"c1": 0.0003429104484342358, "c2": -0.0002230317385714936, "region": "La Libertad", "poblacion": 1859640.0}, {"c1": 0.005618319648226244, "c2": 0.00036293798217035294, "region": "Lambayeque", "poblacion": 1260650.0}, {"c1": 0.007879438073165193, "c2": -0.0010007875900652718, "region": "Lima", "poblacion": 9838251.0}, {"c1": -0.002845285618351267, "c2": 0.00039492235429514674, "region": "Loreto", "poblacion": 1039372.0}, {"c1": -9.402138493097925e-05, "c2": 0.0020302729322234166, "region": "Madre de Dios", "poblacion": 137316.0}, {"c1": 0.0002704578585310239, "c2": 0.0006992342431734758, "region": "Moquegua", "poblacion": 180477.0}, {"c1": -0.0039203669943531135, "c2": -0.0006852264460645126, "region": "Pasco", "poblacion": 304158.0}, {"c1": 0.0011496255580394328, "c2": -0.0009452740819330835, "region": "Piura", "poblacion": 1844129.0}, {"c1": -0.003907660023416998, "c2": -0.000398096416279567, "region": "Puno", "poblacion": 1415608.0}, {"c1": -0.002696806731506819, "c2": -0.0008625941677189187, "region": "San Martin", "poblacion": 840790.0}, {"c1": 0.000324338660971925, "c2": -4.593006840280561e-05, "region": "Tacna", "poblacion": 341838.0}, {"c1": 0.0033208265139443457, "c2": 0.0004375223253265254, "region": "Tumbes", "poblacion": 237685.0}, {"c1": 0.0016285861820465486, "c2": 0.0008134340405738009, "region": "Ucayali", "poblacion": 495522.0}]}, "mark": "circle", "encoding": {"color": {"type": "nominal", "field": "region", "legend": null}, "size": {"type": "quantitative", "field": "poblacion", "legend": null, "scale": {"domain": [137316.0, 1083076.7999999998]}}, "x": {"type": "quantitative", "axis": null, "field": "c1", "scale": {"domain": [-0.004286559720646637, 0.008667381880481714]}}, "y": {"type": "quantitative", "axis": null, "field": "c2"}}, "selection": {"selector420": {"type": "single", "fields": ["c1", "c2"], "empty": "none", "on": "mouseover"}, "selector421": {"type": "interval", "bind": "scales", "encodings": ["x", "y"]}}, "width": 549}, {"data": {"values": [{"c1": -0.0006391571350059887, "c2": -0.0005466653213788196, "region": "Amazonas", "poblacion": 422629.0}, {"c1": -0.00032136447612817615, "c2": 0.0002879914137148724, "region": "Ancash", "poblacion": 1148634.0}, {"c1": -0.0032590358975942034, "c2": -0.00024605274169488603, "region": "Apurimac", "poblacion": 458830.0}, {"c1": 0.004467391148778416, "c2": -0.00018717926307334858, "region": "Arequipa", "poblacion": 1287205.0}, {"c1": -0.0036475042294933082, "c2": 5.774647870997973e-05, "region": "Ayacucho", "poblacion": 688657.0}, {"c1": -0.003485699900964016, "c2": -0.00016022366868761022, "region": "Cajamarca", "poblacion": 1529755.0}, {"c1": 0.005063433555355423, "c2": -9.258343770139541e-05, "region": "Callao", "poblacion": 1010315.0}, {"c1": -0.0010875540295277625, "c2": 0.0009519143767577344, "region": "Cusco", "poblacion": 1316729.0}, {"c1": -0.004286559720646637, "c2": -0.0005938027412891871, "region": "Huancavelica", "poblacion": 494963.0}, {"c1": -0.0040543961614584794, "c2": -0.0001519644147465069, "region": "Huanuco", "poblacion": 860537.0}, {"c1": 0.00639365848450756, "c2": -0.0003711664269095252, "region": "Ica", "poblacion": 787170.0}, {"c1": -0.0022135738286225798, "c2": 0.00047460237757162167, "region": "Junin", "poblacion": 1350783.0}, {"c1": 0.0003429104484342358, "c2": -0.0002230317385714936, "region": "La Libertad", "poblacion": 1859640.0}, {"c1": 0.005618319648226244, "c2": 0.00036293798217035294, "region": "Lambayeque", "poblacion": 1260650.0}, {"c1": 0.007879438073165193, "c2": -0.0010007875900652718, "region": "Lima", "poblacion": 9838251.0}, {"c1": -0.002845285618351267, "c2": 0.00039492235429514674, "region": "Loreto", "poblacion": 1039372.0}, {"c1": -9.402138493097925e-05, "c2": 0.0020302729322234166, "region": "Madre de Dios", "poblacion": 137316.0}, {"c1": 0.0002704578585310239, "c2": 0.0006992342431734758, "region": "Moquegua", "poblacion": 180477.0}, {"c1": -0.0039203669943531135, "c2": -0.0006852264460645126, "region": "Pasco", "poblacion": 304158.0}, {"c1": 0.0011496255580394328, "c2": -0.0009452740819330835, "region": "Piura", "poblacion": 1844129.0}, {"c1": -0.003907660023416998, "c2": -0.000398096416279567, "region": "Puno", "poblacion": 1415608.0}, {"c1": -0.002696806731506819, "c2": -0.0008625941677189187, "region": "San Martin", "poblacion": 840790.0}, {"c1": 0.000324338660971925, "c2": -4.593006840280561e-05, "region": "Tacna", "poblacion": 341838.0}, {"c1": 0.0033208265139443457, "c2": 0.0004375223253265254, "region": "Tumbes", "poblacion": 237685.0}, {"c1": 0.0016285861820465486, "c2": 0.0008134340405738009, "region": "Ucayali", "poblacion": 495522.0}]}, "mark": {"type": "text", "dy": -10}, "encoding": {"opacity": {"condition": {"value": 1.0, "selection": "selector420"}, "value": 0.3}, "size": {"condition": {"value": 12, "selection": "selector420"}, "value": 10}, "text": {"type": "nominal", "field": "region"}, "x": {"type": "quantitative", "axis": null, "field": "c1", "scale": {"domain": [-0.004286559720646637, 0.008667381880481714]}}, "y": {"type": "quantitative", "axis": null, "field": "c2"}}, "width": 549}], "$schema": "https://vega.github.io/schema/vega-lite/v2.4.1.json"};
+    var embed_opt = {"mode": "vega-lite"};
+
+    function showError(el, error){
+        el.innerHTML = ('<div class="error">'
+                        + '<p>JavaScript Error: ' + error.message + '</p>'
+                        + "<p>This usually means there's a typo in your chart specification. "
+                        + "See the javascript console for the full traceback.</p>"
+                        + '</div>');
+        throw error;
+    }
+    const el = document.getElementById('vis');
+    vegaEmbed("#vis", spec, embed_opt)
+      .catch(error => showError(el, error));
+  </script>
+</body>
+</html>
