@@ -39,37 +39,3 @@ def pdp_clusters(clusters, df, rows, columns, values, variables=None, vars_filte
         out = pd.concat(out, ignore_index=True)
 
     return out
-
-
-    # '''
-    # Formats dataframe for suitable use in plotting pdp graphs.
-    
-    # Parameteres
-    # -----------
-    # df : pandas.DataFrame
-    # rows : str
-    #     Column name to be use as rows.
-    # columns : str
-    #     Column name to be use new columns.
-    # values : str
-    #     Column name to be use for values.
-    # variables : str
-    #     Column name to distinct variables.
-    # vars_filter: str
-    #     Filter for df[vars]
-
-    # Returns
-    # -------
-    # df : pandas.DataFrame
-    # '''
-
-    #    df = df.copy()
-    # group = [rows, columns]
-    # if vars_filter and variables:
-    #     df = df[df[variables] == vars_filter].drop(variables, axis=1)
-    # elif vars_filter is None and variables:
-    #     group = [variables] + group
-
-    # df = df.set_index(group).unstack()
-    # df.columns = df.columns.get_level_values(1)
-    # df = df.T.reset_index()
