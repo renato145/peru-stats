@@ -1,7 +1,9 @@
 import altair as alt
 import pandas as pd
+from . import utils
 
-def _build_slope(df, values, time, bars, col, text, filter_in, y_pos=10, width=350, height=400):
+def _build_slope(df, values, time, bars, col, text, filter_in,
+                 y_pos=10, width=350, height=400, y_title=None):
     base = alt.Chart(df)
 
     if time is None:
@@ -18,7 +20,7 @@ def _build_slope(df, values, time, bars, col, text, filter_in, y_pos=10, width=3
         x=alt.X('slope_x:N', title=slope_x_title,
                 axis=alt.Axis(labels=False),
                 scale=alt.Scale(domain=['averages', 'measures', ''])),
-        y=alt.Y(values, title=None,
+        y=alt.Y(values, title=y_title,
                 scale=alt.Scale(domain=[df[values].min(), df[values].max()])),
         color=alt.Color(col, legend=None)
     ).transform_filter(
@@ -144,12 +146,41 @@ def tl_summary(df, values, time, bars, col, text,
 
     return chart
 
-def slope_comparison(df, values, bars, col, text,
-                     bars_w=200, bars_h=515,
-                     slope_avg='Average', slope_w=350, slope_h=240, slope_y_pos=10,
-                     palette='tableau10'):
+def slope_comparison(df, values, bars, col, text, bars_w=200, bars_h=515,
+                     slope_avg='Average', slope_w=350, slope_h=240,
+                     slope_y_pos=10, slope_y_title=None):
     '''
-    Plot a slope graph for given variables and year.
+    Plots 3 charts: v-bars and 2 slopegraph for comparison.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+    values : str
+        Name of the column used for values.
+    bars : str
+        Name of the column used to plot as X-axis on the bars.
+    col : str
+        Name of the column used for colors.
+    text : str
+        Name of the column used to show text on slopegraph.
+    bars_w : int
+        Bars plot width.
+    bars_h : int
+        Bars plot height.
+    slope_avg : str
+        Title for the avg measures on slopegraph.
+    slope_w : int
+        Slopegraph plot width.
+    slope_h : int
+        Slopegraph plot height.
+    slope_y_pos : int
+        Slopegraph titles position.
+    slope_y_title : str
+        Title to use on slope y axis.
+
+    Returns
+    -------
+        altair.Chart
 
     Parameters
     ----------
@@ -173,7 +204,7 @@ def slope_comparison(df, values, bars, col, text,
     df['slope_text'] = df[values].astype(str) + ' ' + df[col]
 
     mouse = alt.selection_single(on='mouseover', fields=[bars], empty='none', nearest=True)
-    click = alt.selection_single(fields=[bars], empty='none', nearest=True)
+    click = alt.selection_single(fields=[bars], empty='none')
 
     base = alt.Chart(df)
 
@@ -203,8 +234,129 @@ def slope_comparison(df, values, bars, col, text,
         width=bars_w, height=bars_h
     )
     
-    slope_mouse = _build_slope(df, values, None, bars, col, text, mouse, slope_y_pos, slope_w, slope_h)
-    slope_click = _build_slope(df, values, None, bars, col, text, click, slope_y_pos, slope_w, slope_h)
+    slope_mouse = _build_slope(df, values, None, bars, col, text, mouse,
+                               slope_y_pos, slope_w, slope_h, slope_y_title)
+    slope_click = _build_slope(df, values, None, bars, col, text, click,
+                               slope_y_pos, slope_w, slope_h)
     chart = (bars_ci + barsplot) | (slope_mouse & slope_click)
 
     return chart
+
+def pdp_plot(df, rows, columns, values, variables=None, vars_filter=None,
+             clusters=False, cluster_centers=5,
+             columns_type='N', x_title=None, y_title=None,
+             width=700, height=300):
+    '''
+    Plots a pdp plot for one variable.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Expects the l
+
+    Returns
+    -------
+    altair.Chart
+    '''
+    df = df.copy()
+    if vars_filter and variables:
+        df = df[df[variables] == vars_filter].drop(variables, axis=1)
+
+    base = alt.Chart(df).properties(
+        width=width, height=height
+    )
+
+    if clusters:
+        df_clusters = utils.pdp_clusters(cluster_centers, df, rows, columns, values)
+        background = alt.Chart(df_clusters).mark_line(strokeWidth=2).encode(
+            alt.X(f'{columns}:{columns_type}', title=x_title),
+            alt.Y(values, title=y_title),
+            alt.Opacity(rows, legend=None),
+            alt.ColorValue('#468499')
+        ).properties(
+            width=width, height=height
+        )
+    else:
+        background = base.mark_line(strokeWidth=1).encode(
+            alt.X(f'{columns}:{columns_type}', title=x_title),
+            alt.Y(values, title=y_title),
+            alt.Opacity(rows, legend=None),
+            alt.ColorValue('#bbbbbb')
+        )
+
+    df_avg = df.groupby(columns)[values].mean().reset_index()
+    avg_base = alt.Chart(df_avg).encode(
+        alt.X(f'{columns}:{columns_type}', title=x_title),
+        alt.Y(values, title=y_title),
+    )
+    avg = avg_base.mark_line(strokeWidth=5, color='gold')
+    avg += avg_base.mark_line(strokeWidth=2)
+    avg += avg_base.mark_point(filled=True, size=55)
+
+    return background + avg
+
+def pdp_plot_filter(filter_in, df, rows, columns, values, variables,
+                    clusters=True, cluster_centers=3, cluster_lines=True,
+                    columns_type='N', x_title=None, y_title=None,
+                    width=700, height=400):
+    df = df.copy()
+
+    def get_lines(data, stroke_w, color, **kwargs):
+        lines = alt.Chart(data).mark_line(strokeWidth=stroke_w, **kwargs).encode(
+            alt.X(f'{columns}:{columns_type}',
+                  title=x_title, axis=alt.Axis(minExtent=30)),
+            alt.Y(values, title=y_title),
+            alt.Opacity(rows, legend=None),
+            alt.ColorValue(color)
+        ).transform_filter(
+            filter_in
+        ).properties(
+            width=width, height=height
+        )
+        return lines
+
+    if clusters:
+        df_clusters = utils.pdp_clusters(cluster_centers, df, rows, columns, values, variables)
+        background = get_lines(df_clusters, 2, '#468499')
+    else:
+        background = get_lines(df, 1, '#bbbbbb')
+
+    if cluster_lines: background = get_lines(df, 1, '#bbbbbb', strokeDash=[2,2]) + background
+
+    df_avg = df.groupby([columns, variables])[values].mean().reset_index()
+    avg_base = alt.Chart(df_avg).encode(
+        alt.X(f'{columns}:{columns_type}', title=x_title),
+        alt.Y(values, title=y_title),
+    ).transform_filter(filter_in)
+    
+    avg = avg_base.mark_line(strokeWidth=5, color='gold')
+    avg += avg_base.mark_line(strokeWidth=2)
+    avg += avg_base.mark_point(filled=True, size=55)
+
+    return background + avg
+
+def pdp_explore(df, rows, columns, values, variables,
+                bars_w=570, bars_h=100,
+                title='', **kwargs):
+    select = alt.selection_single(on='mouseover', fields=[variables], empty='none')
+
+    base = alt.Chart(df)
+
+    barsplot = base.mark_bar().encode(
+        alt.X(f'mean({values})', title=None),
+        alt.Y(variables, axis=alt.Axis(orient='right'), title=None),
+        opacity=alt.condition(select, alt.value(1), alt.value(0.65))
+    ).properties(
+        selection=select,
+        width=bars_w, height=bars_h
+    )
+
+    pdp = pdp_plot_filter(select, df, rows, columns, values, variables, **kwargs)
+
+    chart = alt.vconcat(
+        barsplot, pdp,
+        title=title
+    )
+
+    return chart
+
