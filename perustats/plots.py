@@ -363,38 +363,52 @@ def pdp_explore(df, rows, columns, values, variables,
 
     return chart
 
-def timeline_grid(df, values, time, grid, variables=None, vars_filter=None,
-                  title=None, unit=None, cols=6, fs=(13,6), plot_avg=True,
-                  sharey=True, percentage=False):
+def timeline_grid(df, values, time, grid, variables=None, vars_filter=[], vars_lbl=[],
+                  title=None, unit=None, cols=6, fs=(14,6), plot_avg=True, avg_lbl='avg',
+                  sharey=True, percentage=False, legend=False,
+                  legend_bbox=(0,-0.5), legend_loc='upper center'):
     df = df.copy()
     if percentage: df[values] = df[values] * 100
-    if vars_filter and variables:
-        df = df[df[variables] == vars_filter].drop(variables, axis=1)
-    
-    avgs = df.groupby(time)[values].mean().reset_index()
-    ys = avgs[time].unique()
-    years = ys
-    ys = [*ys[::3], ys[-1]]
-    ysl = [f'{e}'[2:4] for e in ys]
-    n = df[grid].nunique()
-    rows =  math.ceil(n / cols)
-    fig, axes = plt.subplots(rows, cols, sharey=sharey, sharex=True, figsize=(fs))
-    for ax,g in zip(axes.flatten(), df[grid].unique()):
-        df_g = df[df[grid] == g]
-        if plot_avg: ax.plot(avgs[time], avgs[values], ':', color='gray')
-        ax.plot(df_g[time], df_g[values], '-o', markersize=3, alpha=0.75)
-        ax.set_title(g)
-        ax.set_xticks(ys)
-        ax.set_xticklabels(ysl)
-        if percentage: ax.yaxis.set_major_formatter(ticker.PercentFormatter())
+    if variables is None: vars_filter = [None]
+    if type(vars_filter) == str: vars_filter = [vars_filter]
+    cmap = plt.get_cmap('tab10')
+
+    for idx,var in enumerate(vars_filter):
+        col = cmap(idx)
+        if variables: df_t = df[df[variables] == var].drop(variables, axis=1)
+        else: df_t = df
         
+        label = var if len(vars_lbl) == 0 else vars_lbl[idx]
+        
+        if idx == 0:
+            avgs = df_t.groupby(time)[values].mean().reset_index()
+            ys = avgs[time].unique()
+            years = ys
+            ys = [*ys[::3], ys[-1]]
+            ysl = [f'{e}'[2:4] for e in ys]
+            n = df_t[grid].nunique()
+            rows =  math.ceil(n / cols)
+            fig, axes = plt.subplots(rows, cols, sharey=sharey, sharex=True, figsize=(fs))
+        
+        for i,(ax,g) in enumerate(zip(axes.flatten(), df_t[grid].unique())):
+            df_g = df_t[df_t[grid] == g]
+            ax.plot(avgs[time], avgs[values], ':', color=col,
+                    alpha=0.4, label=f'{avg_lbl}-{label}')
+            ax.plot(df_g[time], df_g[values], '-o', color=col,
+                    markersize=3, alpha=0.75, label=label)
+            ax.set_title(g)
+            ax.set_xticks(ys)
+            ax.set_xticklabels(ysl)
+            if percentage: ax.yaxis.set_major_formatter(ticker.PercentFormatter())
+        
+    if legend: ax.legend(bbox_to_anchor=legend_bbox, loc=legend_loc, borderaxespad=0.)
     for ax in axes.flatten()[len(df[grid].unique()):]: ax.set_axis_off()
 
     if title:
         title += f' ({unit})' if unit else ''
         print(title + ':')
+
     sns.despine()
-    plt.tight_layout()
     plt.show()
     print(f'Years: {", ".join(years.astype(str))}.')
     
