@@ -1,1 +1,5 @@
-echo 'asdasdas'
+# xls -> csv
+libreoffice --headless --convert-to csv file.xls --outdir path
+
+# xls -> csv, several files
+ls path/*.xls | while read line; do libreoffice --headless --convert-to csv $line --outdir path; done

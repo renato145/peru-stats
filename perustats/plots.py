@@ -1,5 +1,8 @@
-import altair as alt
-import pandas as pd
+import math
+import pandas as pd, numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import seaborn as sns, altair as alt
 from . import utils
 
 def _build_slope(df, values, time, bars, col, text, filter_in,
@@ -360,3 +363,38 @@ def pdp_explore(df, rows, columns, values, variables,
 
     return chart
 
+def timeline_grid(df, values, time, grid, variables=None, vars_filter=None,
+                  title=None, unit=None, cols=6, fs=(13,6), plot_avg=True,
+                  sharey=True, percentage=False):
+    df = df.copy()
+    if percentage: df[values] = df[values] * 100
+    if vars_filter and variables:
+        df = df[df[variables] == vars_filter].drop(variables, axis=1)
+    
+    avgs = df.groupby(time)[values].mean().reset_index()
+    ys = avgs[time].unique()
+    years = ys
+    ys = [*ys[::3], ys[-1]]
+    ysl = [f'{e}'[2:4] for e in ys]
+    n = df[grid].nunique()
+    rows =  math.ceil(n / cols)
+    fig, axes = plt.subplots(rows, cols, sharey=sharey, sharex=True, figsize=(fs))
+    for ax,g in zip(axes.flatten(), df[grid].unique()):
+        df_g = df[df[grid] == g]
+        if plot_avg: ax.plot(avgs[time], avgs[values], ':', color='gray')
+        ax.plot(df_g[time], df_g[values], '-o', markersize=3, alpha=0.75)
+        ax.set_title(g)
+        ax.set_xticks(ys)
+        ax.set_xticklabels(ysl)
+        if percentage: ax.yaxis.set_major_formatter(ticker.PercentFormatter())
+        
+    for ax in axes.flatten()[len(df[grid].unique()):]: ax.set_axis_off()
+
+    if title:
+        title += f' ({unit})' if unit else ''
+        print(title + ':')
+    sns.despine()
+    plt.tight_layout()
+    plt.show()
+    print(f'Years: {", ".join(years.astype(str))}.')
+    
