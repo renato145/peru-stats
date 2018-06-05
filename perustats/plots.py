@@ -348,16 +348,25 @@ def pdp_explore(df, rows, columns, values, variables,
     barsplot = base.mark_bar().encode(
         alt.X(f'mean({values})', title=None),
         alt.Y(variables, axis=alt.Axis(orient='right'), title=None),
+        color=alt.condition(select, alt.value('#468499'), alt.value('#bbbbbb')),
         opacity=alt.condition(select, alt.value(1), alt.value(0.65))
     ).properties(
         selection=select,
         width=bars_w, height=bars_h
     )
 
+    rule = base.mark_rule().encode(
+        y=alt.Y(variables, axis=alt.Axis(orient='right'), title=None),
+    ).properties(
+        width=bars_w, height=bars_h
+    ).transform_filter(
+        select
+    )
+
     pdp = pdp_plot_filter(select, df, rows, columns, values, variables, **kwargs)
 
     chart = alt.vconcat(
-        barsplot, pdp,
+        barsplot + rule, pdp,
         title=title
     )
 
@@ -369,26 +378,25 @@ def timeline_grid(df, values, time, grid, variables=None, vars_filter=[], vars_l
                   legend_bbox=(0,-0.5), legend_loc='upper center'):
     df = df.copy()
     if percentage: df[values] = df[values] * 100
-    if variables is None: vars_filter = [None]
     if type(vars_filter) == str: vars_filter = [vars_filter]
-    cmap = plt.get_cmap('tab10')
+    if variables is None: vars_filter = [None]
+    elif len(vars_filter) > 0: df = df[df[variables].isin(vars_filter)]
 
-    for idx,var in enumerate(vars_filter):
+    cmap = plt.get_cmap('tab10')
+    ys = df[time].unique()
+    years = ys
+    ys = [*ys[::3], ys[-1]]
+    ysl = [f'{e}'[2:4] for e in ys]
+    n = df[grid].nunique()
+    rows =  math.ceil(n / cols)
+    fig, axes = plt.subplots(rows, cols, sharey=sharey, sharex=True, figsize=(fs))
+
+    for idx,var in enumerate(df[variables].unique()):
         col = cmap(idx)
         if variables: df_t = df[df[variables] == var].drop(variables, axis=1)
         else: df_t = df
-        
         label = var if len(vars_lbl) == 0 else vars_lbl[idx]
-        
-        if idx == 0:
-            avgs = df_t.groupby(time)[values].mean().reset_index()
-            ys = avgs[time].unique()
-            years = ys
-            ys = [*ys[::3], ys[-1]]
-            ysl = [f'{e}'[2:4] for e in ys]
-            n = df_t[grid].nunique()
-            rows =  math.ceil(n / cols)
-            fig, axes = plt.subplots(rows, cols, sharey=sharey, sharex=True, figsize=(fs))
+        avgs = df_t.groupby(time)[values].mean().reset_index()
         
         for i,(ax,g) in enumerate(zip(axes.flatten(), df_t[grid].unique())):
             df_g = df_t[df_t[grid] == g]
@@ -411,4 +419,5 @@ def timeline_grid(df, values, time, grid, variables=None, vars_filter=[], vars_l
     sns.despine()
     plt.show()
     print(f'Years: {", ".join(years.astype(str))}.')
+    return fig
     
