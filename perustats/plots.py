@@ -56,7 +56,7 @@ def _build_slope(df, values, time, bars, col, text, filter_in,
     return slope_points + slope_lines + slope_text_1 + slope_text_2 + slope_title
 
 def tl_summary(df, values, time, bars, col, text,
-               title='', bars_w=810, bars_h=200,
+               title='', bars_w=810, bars_h=200, bars_stack='zero',
                timeline_w=450, timeline_h=200,
                slope_avg='Average', slope_w=300, slope_h=200, slope_y_pos=10,
                palette='tableau10'):
@@ -111,12 +111,17 @@ def tl_summary(df, values, time, bars, col, text,
     df['slope_text'] = df[values].astype(str) + ' ' + df[col]
 
     max_time = df[time].max()
-    filter_in = alt.selection_single(fields=[bars], on='mouseover', empty='none')
+    orders = (df[df[time] == max_time].
+                groupby(bars)[values].sum().
+                sort_values(ascending=False).index.tolist())
+    orders.remove(slope_avg)
 
+    filter_in = alt.selection_single(fields=[bars], on='mouseover', empty='none')
     base = alt.Chart(df)
     barsplot = base.mark_bar().encode(
-        alt.X(f'{bars}:N', title=None),
-        alt.Y(f'{values}:Q', title=text),
+        alt.X(f'{bars}:N', title=None,
+              scale=alt.Scale(domain=orders)),
+        alt.Y(f'{values}:Q', title=text, stack=bars_stack),
         alt.Color(col,
                 legend=alt.Legend(orient='bottom-left', title=None),
                 scale=alt.Scale(scheme=palette)
