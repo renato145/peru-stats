@@ -56,7 +56,7 @@ def _build_slope(df, values, time, bars, col, text, filter_in,
     return slope_points + slope_lines + slope_text_1 + slope_text_2 + slope_title
 
 def tl_summary(df, values, time, bars, col, text,
-               bars_w=810, bars_h=200,
+               title='', bars_w=810, bars_h=200,
                timeline_w=450, timeline_h=200,
                slope_avg='Average', slope_w=300, slope_h=200, slope_y_pos=10,
                palette='tableau10'):
@@ -76,6 +76,8 @@ def tl_summary(df, values, time, bars, col, text,
         Name of the column used for colors.
     text : str
         Name of the column used to show text on slopegraph.
+    title : str
+        Title of the plot.
     bars_w : int
         Bars plot width.
     bars_h : int
@@ -123,6 +125,7 @@ def tl_summary(df, values, time, bars, col, text,
     ).transform_filter(
         {'and': [f'datum.{time} == {max_time}', 'datum.slope_x == "measures"']}
     ).properties(
+        title=title,
         selection=filter_in,
         width=bars_w, height=bars_h
     )
@@ -304,7 +307,7 @@ def pdp_plot_filter(filter_in, df, rows, columns, values, variables,
                     width=700, height=400):
     df = df.copy()
 
-    def get_lines(data, stroke_w, color, **kwargs):
+    def get_lines(data, stroke_w, color, selection=None, **kwargs):
         lines = alt.Chart(data).mark_line(strokeWidth=stroke_w, **kwargs).encode(
             alt.X(f'{columns}:{columns_type}',
                   title=x_title, axis=alt.Axis(minExtent=30)),
@@ -316,15 +319,22 @@ def pdp_plot_filter(filter_in, df, rows, columns, values, variables,
         ).properties(
             width=width, height=height
         )
+        if selection:
+            lines = lines.encode(
+                size=alt.condition(selection, alt.value(stroke_w*2), alt.value(stroke_w)
+)            ).properties(selection=selection)
         return lines
 
     if clusters:
+        mouseover_cluster = alt.selection_single(on='mouseover', fields=[rows], empty='none', nearest=True)
         df_clusters = utils.pdp_clusters(cluster_centers, df, rows, columns, values, variables)
-        background = get_lines(df_clusters, 2, '#468499')
+        background = get_lines(df_clusters, 2, '#468499', selection=mouseover_cluster)
     else:
         background = get_lines(df, 1, '#bbbbbb')
 
-    if cluster_lines: background = get_lines(df, 1, '#bbbbbb', strokeDash=[2,2]) + background
+    if cluster_lines:
+        # mouseover_lines = alt.selection_single(on='mouseover', fields=[rows], empty='none', nearest=True)
+        background = get_lines(df, 1, '#bbbbbb', strokeDash=[2,2]) + background
 
     df_avg = df.groupby([columns, variables])[values].mean().reset_index()
     avg_base = alt.Chart(df_avg).encode(
@@ -341,7 +351,7 @@ def pdp_plot_filter(filter_in, df, rows, columns, values, variables,
 def pdp_explore(df, rows, columns, values, variables,
                 bars_w=570, bars_h=100,
                 title='', **kwargs):
-    select = alt.selection_single(on='mouseover', fields=[variables], empty='none')
+    select = alt.selection_single(fields=[variables], empty='none')
 
     base = alt.Chart(df)
 
@@ -401,9 +411,9 @@ def timeline_grid(df, values, time, grid, variables=None, vars_filter=[], vars_l
         for i,(ax,g) in enumerate(zip(axes.flatten(), df_t[grid].unique())):
             df_g = df_t[df_t[grid] == g]
             ax.plot(avgs[time], avgs[values], ':', color=col,
-                    alpha=0.4, label=f'{avg_lbl}-{label}')
+                    alpha=0.6, label=f'{avg_lbl}-{label}')
             ax.plot(df_g[time], df_g[values], '-o', color=col,
-                    markersize=3, alpha=0.75, label=label)
+                    markersize=3, alpha=1, label=label)
             ax.set_title(g)
             ax.set_xticks(ys)
             ax.set_xticklabels(ysl)
